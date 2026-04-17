@@ -211,7 +211,7 @@ const initArgs = async () => {
     }
     return !["false", "0", "no", "n"].includes(normalized);
   };
-  args.screenshot_enabled = parseBooleanArg("screenshot", true) && !parseBooleanArg("disable_screenshot", false) && !parseBooleanArg("no_screenshot", false);
+  args.screenshot_enabled = parseBooleanArg("mqtt_screenshot", true);
 
   // Calculate arguments hash
   const argsFileHash = crypto.createHash("sha256").update(JSON.stringify(args)).digest("hex");
@@ -352,7 +352,7 @@ const promptArgs = async (proc) => {
       fallback: "y/N",
     },
     {
-      key: "screenshot",
+      key: "mqtt_screenshot",
       question: "Capture screenshot for MQTT?",
       fallback: "Y/n",
     },
@@ -409,7 +409,7 @@ const promptArgs = async (proc) => {
         const value = answer.trim() || fallback.match(/[YN]/)[0];
         if (key === "web_url") {
           args[key] = value.split(",").map((v) => v.trim());
-        } else if (key === "screenshot") {
+        } else if (key === "mqtt_screenshot") {
           args[key] = ["y", "yes"].includes(value.toLowerCase()) ? "true" : "false";
         } else {
           args[key] = value;
