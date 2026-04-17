@@ -50,6 +50,7 @@ app.whenReady().then(async () => {
   if ("mqtt_password" in args) {
     args.mqtt_password = "*".repeat((args.mqtt_password || "").length);
   }
+  delete args.screenshot_enabled;
   console.info(`Arguments: ${JSON.stringify(args, null, 2)}`);
   process.stdout.write("\n");
 
@@ -436,6 +437,7 @@ const promptArgs = async (proc) => {
 const writeArgs = (path, args) => {
   try {
     const argc = Object.assign({}, args);
+    delete argc.screenshot_enabled;
     if ("mqtt_password" in argc) {
       argc.mqtt_password = encrypt(argc.mqtt_password);
     }
