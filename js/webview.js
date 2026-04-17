@@ -33,6 +33,10 @@ global.WEBVIEW = global.WEBVIEW || {
   },
 };
 
+const screenshotEnabled = () => {
+  return ARGS.screenshot_enabled !== false;
+};
+
 /**
  * Initializes the webview with the provided arguments.
  *
@@ -333,9 +337,11 @@ const updateView = () => {
   });
 
   // Update webview screenshot
-  captureView(1000).then(() => {
-    EVENTS.emit("updateScreenshot");
-  });
+  if (screenshotEnabled()) {
+    captureView(1000).then(() => {
+      EVENTS.emit("updateScreenshot");
+    });
+  }
   EVENTS.emit("updatePage");
   update();
 };
@@ -719,9 +725,11 @@ const resizeView = () => {
   }
 
   // Update webview screenshot
-  captureView(1000).then(() => {
-    EVENTS.emit("updateScreenshot");
-  });
+  if (screenshotEnabled()) {
+    captureView(1000).then(() => {
+      EVENTS.emit("updateScreenshot");
+    });
+  }
 };
 
 /**
@@ -1249,14 +1257,16 @@ const appEvents = async () => {
   });
 
   // Update latest screenshot (every full 1min)
-  interval(() => {
-    if (APP.exiting) {
-      return;
-    }
-    captureView(5000).then(() => {
-      EVENTS.emit("updateScreenshot");
-    });
-  }, 60 * 1000);
+  if (screenshotEnabled()) {
+    interval(() => {
+      if (APP.exiting) {
+        return;
+      }
+      captureView(5000).then(() => {
+        EVENTS.emit("updateScreenshot");
+      });
+    }, 60 * 1000);
+  }
 
   // Check latest release (every full 2h)
   interval(() => {

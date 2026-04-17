@@ -196,6 +196,23 @@ const initArgs = async () => {
     args.web_url = args.web_url.split(",").map((url) => url.trim());
   }
 
+  // Normalize screenshot argument
+  const parseBooleanArg = (key, defaultValue = false) => {
+    if (!(key in args)) {
+      return defaultValue;
+    }
+    const value = args[key];
+    if (value === null) {
+      return true;
+    }
+    const normalized = String(value).trim().toLowerCase();
+    if (!normalized) {
+      return true;
+    }
+    return !["false", "0", "no", "n"].includes(normalized);
+  };
+  args.screenshot_enabled = parseBooleanArg("screenshot", true) && !parseBooleanArg("disable_screenshot", false) && !parseBooleanArg("no_screenshot", false);
+
   // Calculate arguments hash
   const argsFileHash = crypto.createHash("sha256").update(JSON.stringify(args)).digest("hex");
   const argsUpdated = argsFileHashExists && argsFileHash !== fs.readFileSync(argsFileHashPath, "utf8");
@@ -335,6 +352,11 @@ const promptArgs = async (proc) => {
       fallback: "y/N",
     },
     {
+      key: "screenshot",
+      question: "Capture screenshot for MQTT?",
+      fallback: "Y/n",
+    },
+    {
       key: "mqtt_url",
       question: "\nEnter MQTT url",
       fallback: "mqtt://192.168.1.42:1883",
@@ -384,9 +406,11 @@ const promptArgs = async (proc) => {
       } else if (!ignore.includes(key)) {
         const prompt = `${question} (${fallback}): `;
         const answer = await read.question(prompt);
-        const value = answer.trim() || fallback;
+        const value = answer.trim() || fallback.match(/[YN]/)[0];
         if (key === "web_url") {
           args[key] = value.split(",").map((v) => v.trim());
+        } else if (key === "screenshot") {
+          args[key] = ["y", "yes"].includes(value.toLowerCase()) ? "true" : "false";
         } else {
           args[key] = value;
         }

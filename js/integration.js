@@ -93,7 +93,9 @@ const init = async () => {
       initLastActive();
 
       // Init client diagnostic
-      initScreenshot();
+      if (ARGS.screenshot_enabled) {
+        initScreenshot();
+      }
       initHeartbeat();
       initErrors();
       initVersion();
@@ -116,7 +118,9 @@ const init = async () => {
         updateDisplay();
         updateLastActive();
       });
-      EVENTS.on("updateScreenshot", updateScreenshot);
+      if (ARGS.screenshot_enabled) {
+        EVENTS.on("updateScreenshot", updateScreenshot);
+      }
       EVENTS.on("consoleLog", updateErrors);
     })
     .on("connect", () => {
@@ -1087,6 +1091,9 @@ const initScreenshot = () => {
  * Updates the page screenshot via the mqtt connection.
  */
 const updateScreenshot = async () => {
+  if (!ARGS.screenshot_enabled) {
+    return;
+  }
   const screenshot = WEBVIEW.tracker.screenshot;
   publishState("screenshot", screenshot);
 };
